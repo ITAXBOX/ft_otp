@@ -9,6 +9,9 @@ import com.ftotp.crypto.KeyFile;
 import com.ftotp.crypto.Params;
 import com.ftotp.exception.UserException;
 import com.ftotp.hotp.HOTP;
+import com.ftotp.qr.TerminalQRRenderer;
+import com.ftotp.ui.TerminalUI;
+import com.ftotp.uri.OtpUri;
 import com.ftotp.util.Constants;
 import com.ftotp.util.Hex;
 
@@ -50,7 +53,7 @@ public class FtOtp {
 
 		Path out = Path.of(Constants.DEFAULT_KEY_FILENAME);
 		Files.writeString(out, kf.serialize());
-		System.out.printf(Constants.SUCCESS_KEY_SAVED + "%n", Constants.DEFAULT_KEY_FILENAME);
+		TerminalUI.printKeyGenerated(Constants.DEFAULT_KEY_FILENAME);
 	}
 
 	// Prints the current OTP code using the key file and a passphrase
@@ -81,6 +84,57 @@ public class FtOtp {
 
 		int mod = (int) Math.pow(10, digits);
 		int otp = Math.floorMod(code, mod);
-		System.out.printf("%0" + digits + "d%n", otp);
+		String otpString = String.format("%0" + digits + "d", otp);
+		TerminalUI.printOTP(otpString);
+	}
+
+	// Displays a QR code for the key file
+	// keyFilePath: path to the key file
+	public static void displayQRCode(String keyFilePath) throws Exception {
+		KeyFile kf = KeyFile.deserialize(Files.readString(Path.of(keyFilePath)));
+
+		Console console = System.console();
+		char[] pass;
+		if (console != null)
+			pass = console.readPassword(Constants.PROMPT_ENTER_PASSPHRASE);
+		else {
+			System.out.print(Constants.PROMPT_ENTER_PASSPHRASE);
+			try (Scanner sc = new Scanner(System.in)) {
+				pass = sc.nextLine().toCharArray();
+			}
+		}
+		byte[] seed = kf.decrypt(pass);
+		Arrays.fill(pass, '\0');
+
+		// Build TOTP URI
+		String totpUri = OtpUri.builder()
+				.label(Constants.DEFAULT_OTP_LABEL)
+				.secret(seed)
+				.issuer(Constants.DEFAULT_OTP_ISSUER)
+				.algorithm(mapHmacToAlgorithm(kf.getParams().getHmac()))
+				.digits(kf.getParams().getDigits())
+				.period((int) kf.getParams().getTimestepSeconds())
+				.build();
+
+		// Wipe seed from memory
+		Arrays.fill(seed, (byte) 0);
+
+		// Display QR code with nice border
+		TerminalQRRenderer.displayWithBorder(
+				totpUri,
+				Constants.DEFAULT_OTP_LABEL,
+				Constants.DEFAULT_OTP_ISSUER,
+				(int) kf.getParams().getTimestepSeconds(),
+				Constants.QR_CODE_SIZE
+		);
+	}
+
+	// Maps HMAC algorithm name to standard OTP algorithm name
+	private static String mapHmacToAlgorithm(String hmac) {
+		if (hmac.equals("HmacSHA256"))
+			return "SHA256";
+		if (hmac.equals("HmacSHA512"))
+			return "SHA512";
+		return "SHA1"; // Default
 	}
 }
