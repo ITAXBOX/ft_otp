@@ -2,6 +2,7 @@ package com.ftotp;
 
 import com.ftotp.core.FtOtp;
 import com.ftotp.exception.UserException;
+import com.ftotp.gui.MainWindow;
 import com.ftotp.ui.TerminalUI;
 
 // This is a TOTP application main class
@@ -9,9 +10,16 @@ import com.ftotp.ui.TerminalUI;
 // similar to Google Authenticator or other 2FA apps
 public class Main {
 	public static void main(String[] args) {
+		if (args.length == 1 && "-gui".equals(args[0])) {
+			MainWindow.launch();
+			return;
+		}
+		
 		if (args.length != 2 || !("-g".equals(args[0]) || "-k".equals(args[0]) || "-q".equals(args[0]))) {
 			TerminalUI.printBanner();
 			TerminalUI.printUsage();
+			System.out.println("  " + "\u001B[36m" + "./ft_otp" + "\u001B[0m" + " " + "\u001B[33m" + "-gui" + "\u001B[0m" + "              " + "\u001B[2m" + "Launch graphical interface" + "\u001B[0m");
+			System.out.println();
 			System.exit(1);
 		}
 		try {

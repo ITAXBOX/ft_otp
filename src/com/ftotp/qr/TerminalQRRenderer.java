@@ -63,10 +63,9 @@ public final class TerminalQRRenderer {
 		BitMatrix matrix = generateQRCodeMatrix(data, size);
 		String qrCode = matrixToString(matrix);
 
-		// Calculate box width based on QR code width
 		String[] lines = qrCode.split("\n");
 		int qrWidth = lines.length > 0 ? lines[0].length() : 0;
-		int width = qrWidth + 8; // Add padding on both sides
+		int width = qrWidth + 8;
 
 		System.out.println();
 		printLine(Colors.BOLD_CYAN + "╔", "═", "╗" + Colors.RESET, width);

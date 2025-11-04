@@ -1,16 +1,10 @@
 package com.ftotp.ui;
 
-/**
- * Beautiful terminal UI components for ft_otp
- */
 public final class TerminalUI {
 	
 	private TerminalUI() {
 	}
 
-	/**
-	 * Prints a stylized header banner
-	 */
 	public static void printBanner() {
 		System.out.println();
 		System.out.println(Colors.BOLD_CYAN + "╔════════════════════════════════════════════════════════════╗" + Colors.RESET);
@@ -20,46 +14,28 @@ public final class TerminalUI {
 		System.out.println();
 	}
 
-	/**
-	 * Prints success message with icon
-	 */
 	public static void printSuccess(String message) {
 		System.out.println(Colors.BOLD_GREEN + "✓ " + message + Colors.RESET);
 	}
 
-	/**
-	 * Prints error message with icon
-	 */
 	public static void printError(String message) {
 		System.err.println(Colors.BOLD_RED + "✗ Error: " + Colors.RED + message + Colors.RESET);
 	}
 
-	/**
-	 * Prints info message
-	 */
 	public static void printInfo(String message) {
 		System.out.println(Colors.CYAN + "ℹ " + message + Colors.RESET);
 	}
 
-	/**
-	 * Prints warning message
-	 */
 	public static void printWarning(String message) {
 		System.out.println(Colors.YELLOW + "⚠ " + message + Colors.RESET);
 	}
 
-	/**
-	 * Prints a section header
-	 */
 	public static void printSection(String title) {
 		System.out.println();
 		System.out.println(Colors.BOLD_CYAN + "─── " + title + " " + Colors.RESET);
 		System.out.println();
 	}
 
-	/**
-	 * Prints the OTP in a nice box
-	 */
 	public static void printOTP(String otp) {
 		int width = 40;
 		System.out.println();
@@ -72,9 +48,6 @@ public final class TerminalUI {
 		System.out.println();
 	}
 
-	/**
-	 * Prints key generation success message
-	 */
 	public static void printKeyGenerated(String filename) {
 		System.out.println();
 		System.out.println(Colors.BOLD_GREEN + "╔════════════════════════════════════════════════╗" + Colors.RESET);
@@ -89,9 +62,6 @@ public final class TerminalUI {
 		System.out.println();
 	}
 
-	/**
-	 * Prints usage information
-	 */
 	public static void printUsage() {
 		System.out.println();
 		System.out.println(Colors.BOLD_WHITE + "Usage:" + Colors.RESET);
@@ -106,9 +76,6 @@ public final class TerminalUI {
 		System.out.println();
 	}
 
-	/**
-	 * Centers text within a given width
-	 */
 	private static String center(String text, int width) {
 		int padding = (width - text.length()) / 2;
 		int rightPadding = width - text.length() - padding;
