@@ -1,9 +1,18 @@
 package com.ftotp.gui;
 
+import com.ftotp.crypto.KeyFile;
+import com.ftotp.crypto.Params;
+import com.ftotp.exception.UserException;
+import com.ftotp.util.Constants;
+import com.ftotp.util.Hex;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 
 public class GenerateKeyPanel extends JPanel {
 	
@@ -153,19 +162,28 @@ public class GenerateKeyPanel extends JPanel {
 			protected Void doInBackground() throws Exception {
 				try {
 					publish("Reading key file...\n");
-					Thread.sleep(500);
+					String hex = Files.readString(Path.of(keyFile)).trim().replaceAll("\\s+", "");
+					
+					if (!Hex.isHex(hex) || hex.length() < Constants.MIN_HEX_KEY_LENGTH) {
+						throw new UserException("key must be at least 64 hexadecimal characters.");
+					}
+					
+					byte[] seed = Hex.fromHex(hex);
 					
 					publish("Encrypting with passphrase...\n");
-					Thread.sleep(500);
+					KeyFile kf = KeyFile.encrypt(seed, passphrase, Params.defaultParams());
+					Arrays.fill(seed, (byte) 0);
 					
 					publish("Saving to ft_otp.key...\n");
-					Thread.sleep(500);
+					Path out = Path.of(Constants.DEFAULT_KEY_FILENAME);
+					Files.writeString(out, kf.serialize());
 					
 					publish("\n✓ Key generated successfully!\n");
-					publish("✓ Saved to: ft_otp.key\n");
+					publish("✓ Saved to: " + Constants.DEFAULT_KEY_FILENAME + "\n");
 					
 				} catch (Exception e) {
 					publish("\n✗ Error: " + e.getMessage() + "\n");
+					throw e;
 				}
 				return null;
 			}

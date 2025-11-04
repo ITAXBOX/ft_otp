@@ -1,9 +1,16 @@
 package com.ftotp.gui;
 
+import com.ftotp.crypto.KeyFile;
+import com.ftotp.hotp.HOTP;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.util.Arrays;
 
 public class GetOTPPanel extends JPanel {
 	
@@ -162,9 +169,23 @@ public class GetOTPPanel extends JPanel {
 		SwingWorker<String, Void> worker = new SwingWorker<>() {
 			@Override
 			protected String doInBackground() throws Exception {
-				// Simulate OTP generation
-				Thread.sleep(500);
-				return String.format("%06d", (int)(Math.random() * 1000000));
+				// Read and decrypt key file
+				KeyFile kf = KeyFile.deserialize(Files.readString(Path.of(keyFile)));
+				byte[] seed = kf.decrypt(passphrase);
+				
+				// Generate OTP
+				long timeStep = kf.getParams().getTimestepSeconds();
+				long counter = Instant.now().getEpochSecond() / timeStep;
+				int digits = kf.getParams().getDigits();
+				String algo = kf.getParams().getHmac();
+				
+				int code = HOTP.generate(seed, counter, algo);
+				Arrays.fill(seed, (byte) 0);
+				
+				int mod = (int) Math.pow(10, digits);
+				int otp = Math.floorMod(code, mod);
+				
+				return String.format("%0" + digits + "d", otp);
 			}
 			
 			@Override
@@ -172,6 +193,7 @@ public class GetOTPPanel extends JPanel {
 				try {
 					String otp = get();
 					otpLabel.setText(otp);
+					otpLabel.setForeground(new Color(52, 152, 219));
 					startCountdown();
 				} catch (Exception e) {
 					showError("Error generating OTP: " + e.getMessage());

@@ -1,5 +1,8 @@
 package com.ftotp.gui;
 
+import com.ftotp.crypto.KeyFile;
+import com.ftotp.uri.OtpUri;
+import com.ftotp.util.Constants;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.WriterException;
@@ -12,6 +15,9 @@ import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -172,10 +178,30 @@ public class QRCodePanel extends JPanel {
 		SwingWorker<BufferedImage, Void> worker = new SwingWorker<>() {
 			@Override
 			protected BufferedImage doInBackground() throws Exception {
-				// Simulate QR generation - in real implementation, call FtOtp methods
-				Thread.sleep(500);
-				String uri = "otpauth://totp/aitawi?secret=JBSWY3DPEHPK3PXP&issuer=ft_otp&algorithm=SHA1&digits=6&period=30";
-				return generateQRCodeImage(uri, 300, 300);
+				// Read and decrypt key file
+				KeyFile kf = KeyFile.deserialize(Files.readString(Path.of(keyFile)));
+				byte[] seed = kf.decrypt(passphrase);
+				
+				// Map algorithm
+				String hmac = kf.getParams().getHmac();
+				String algorithm = "SHA1";
+				if (hmac.equals("HmacSHA256")) algorithm = "SHA256";
+				else if (hmac.equals("HmacSHA512")) algorithm = "SHA512";
+				
+				// Build TOTP URI
+				String totpUri = OtpUri.builder()
+						.label(Constants.DEFAULT_OTP_LABEL)
+						.secret(seed)
+						.issuer(Constants.DEFAULT_OTP_ISSUER)
+						.algorithm(algorithm)
+						.digits(kf.getParams().getDigits())
+						.period((int) kf.getParams().getTimestepSeconds())
+						.build();
+				
+				// Wipe seed from memory
+				Arrays.fill(seed, (byte) 0);
+				
+				return generateQRCodeImage(totpUri, 300, 300);
 			}
 			
 			@Override
@@ -187,8 +213,8 @@ public class QRCodePanel extends JPanel {
 					qrLabel.revalidate();
 					qrLabel.repaint();
 					
-					accountLabel.setText("👤 Account: aitawi");
-					issuerLabel.setText("🏢 Issuer: ft_otp");
+					accountLabel.setText("👤 Account: " + Constants.DEFAULT_OTP_LABEL);
+					issuerLabel.setText("🏢 Issuer: " + Constants.DEFAULT_OTP_ISSUER);
 					
 				} catch (Exception e) {
 					showError("Error generating QR code: " + e.getMessage());
