@@ -1,5 +1,7 @@
 package com.ftotp.crypto;
 
+import com.ftotp.exception.InvalidKeyFileException;
+
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
 import java.util.*;
@@ -50,10 +52,10 @@ public final class KeyFile {
 				Base64.getEncoder().encodeToString(ct)) + "\n";
 	}
 
-	public static KeyFile deserialize(String text) throws Exception {
+	public static KeyFile deserialize(String text) throws InvalidKeyFileException {
 		String[] lines = text.replace("\r", "").split("\n");
 		if (lines.length < 9 || !MAGIC.equals(lines[0]))
-			throw new Exception("invalid key file");
+			throw new InvalidKeyFileException("invalid key file format or corrupted data");
 		Params p = new Params(
 				Integer.parseInt(lines[1]),
 				Long.parseLong(lines[2]),
