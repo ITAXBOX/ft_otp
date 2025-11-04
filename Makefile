@@ -1,6 +1,5 @@
 JAVA := javac
 JFLAGS := --release 11
-SRC := $(shell find src -name '*.java')
 OUT := out
 MAIN := com.ftotp.Main
 WRAP := ft_otp
@@ -8,16 +7,13 @@ WRAP := ft_otp
 all: $(WRAP)
 
 $(WRAP): compile
-	@echo "#!/usr/bin/env sh" > $(WRAP)
-	@echo "exec java -cp $(OUT) $(MAIN) \"$$@\"" >> $(WRAP)
+	@echo '#!/bin/sh' > $(WRAP)
+	@echo 'exec java -cp $(OUT) $(MAIN) "$$@"' >> $(WRAP)
 	@chmod +x $(WRAP)
 
-compile: $(OUT)/.stamp
-
-$(OUT)/.stamp: $(SRC)
+compile:
 	@mkdir -p $(OUT)
-	@$(JAVA) $(JFLAGS) -d $(OUT) $(SRC)
-	@touch $(OUT)/.stamp
+	@find src -name '*.java' -exec $(JAVA) $(JFLAGS) -d $(OUT) {} +
 
 fclean:
 	@rm -rf $(OUT) $(WRAP)
