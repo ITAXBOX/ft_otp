@@ -17,7 +17,7 @@ public final class Constants {
 	// Default number of digits in the generated OTP code
 	public static final int DEFAULT_OTP_DIGITS = 6;
 
-	// Default time step in seconds for TOTP (time window for validity)
+	// Default time step in seconds for TOTP
 	public static final long DEFAULT_TIMESTEP_SECONDS = 30;
 
 	// Default HMAC algorithm for OTP generation
@@ -56,9 +56,6 @@ public final class Constants {
 	// Bit mask for extracting byte values
 	public static final int BYTE_MASK = 0xff;
 
-	// Usage instruction message
-	public static final String USAGE_MESSAGE = "Usage: ./ft_otp -g <hex_key_file> | -k <ft_otp.key>";
-
 	// Error message for invalid key length
 	public static final String ERROR_KEY_TOO_SHORT = "key must be at least 64 hexadecimal characters.";
 
@@ -76,4 +73,16 @@ public final class Constants {
 
 	// Success message template for key generation
 	public static final String SUCCESS_KEY_SAVED = "Key was successfully saved in %s.";
+
+	// Default QR code size for terminal display
+	public static final int QR_CODE_SIZE = 50;
+
+	// Default OTP issuer name
+	public static final String DEFAULT_OTP_ISSUER = "ft_otp";
+
+	// Default OTP account label
+	public static final String DEFAULT_OTP_LABEL = "aitawi";
+
+	// Updated usage message with QR code option
+	public static final String USAGE_MESSAGE_FULL = "Usage: ./ft_otp -g <hex_key_file> | -k <ft_otp.key> | -q <ft_otp.key>";
 }
