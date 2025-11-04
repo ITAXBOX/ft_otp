@@ -1,6 +1,7 @@
 package com.ftotp.crypto;
 
 import com.ftotp.exception.InvalidKeyFileException;
+import com.ftotp.util.Constants;
 
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -9,7 +10,7 @@ import java.util.*;
 // Represents an encrypted key file containing a seed encrypted with a password.
 public final class KeyFile {
 	// Magic string to identify the file format and for AEAD associated data.
-	private static final String MAGIC = "FTOTP1";
+	private static final String MAGIC = Constants.KEY_FILE_MAGIC;
 	// Salt for PBKDF2 key derivation.
 	private final byte[] salt;
 	// IV for AES-GCM encryption.
@@ -32,8 +33,8 @@ public final class KeyFile {
 	// The MAGIC string is used as associated data for AEAD.
 	// After encryption, the derived key is securely wiped from memory.
 	public static KeyFile encrypt(byte[] seed, char[] pass, Params params) {
-		byte[] salt = rand(16);
-		byte[] iv = rand(12);
+		byte[] salt = rand(Constants.SALT_LENGTH_BYTES);
+		byte[] iv = rand(Constants.IV_LENGTH_BYTES);
 		byte[] key = Crypto.deriveKey(pass, salt, params.getPbkdf2Iterations(), params.getAesKeyBytes());
 		byte[] ct = Crypto.aesGcmEncrypt(key, iv, seed, MAGIC.getBytes(StandardCharsets.UTF_8));
 		Arrays.fill(key, (byte) 0);
@@ -68,7 +69,7 @@ public final class KeyFile {
 	public static KeyFile deserialize(String text) throws InvalidKeyFileException {
 		String[] lines = text.replace("\r", "").split("\n");
 		if (lines.length < 9 || !MAGIC.equals(lines[0]))
-			throw new InvalidKeyFileException("invalid key file format or corrupted data");
+			throw new InvalidKeyFileException(Constants.ERROR_INVALID_KEY_FILE);
 		Params p = new Params(
 				Integer.parseInt(lines[1]),
 				Long.parseLong(lines[2]),

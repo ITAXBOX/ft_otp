@@ -1,5 +1,7 @@
 package com.ftotp.crypto;
 
+import com.ftotp.util.Constants;
+
 import javax.crypto.Cipher;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.GCMParameterSpec;
@@ -19,7 +21,7 @@ public final class Crypto {
 			PBEKeySpec spec = new PBEKeySpec(pass, salt, iterations, keyLenBytes * 8);
 			// PBKDF2 with HMAC-SHA256
 			// Generate the key
-			byte[] key = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256").generateSecret(spec).getEncoded();
+			byte[] key = SecretKeyFactory.getInstance(Constants.PBKDF2_ALGORITHM).generateSecret(spec).getEncoded();
 			spec.clearPassword();
 			return key;
 		} catch (Exception e) {
@@ -32,8 +34,8 @@ public final class Crypto {
 	// Returns the ciphertext
 	public static byte[] aesGcmEncrypt(byte[] key, byte[] iv, byte[] plaintext, byte[] aad) {
 		try {
-			Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-			c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(128, iv));
+			Cipher c = Cipher.getInstance(Constants.AES_CIPHER_MODE);
+			c.init(Cipher.ENCRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(Constants.GCM_TAG_LENGTH_BITS, iv));
 			if (aad != null)
 				c.updateAAD(aad);
 			return c.doFinal(plaintext);
@@ -46,8 +48,8 @@ public final class Crypto {
 	// key: decryption key, iv: initialization vector, ciphertext: data to decrypt, aad: additional authenticated data
 	// Returns the plaintext
 	public static byte[] aesGcmDecrypt(byte[] key, byte[] iv, byte[] ciphertext, byte[] aad) throws Exception {
-		Cipher c = Cipher.getInstance("AES/GCM/NoPadding");
-		c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(128, iv));
+		Cipher c = Cipher.getInstance(Constants.AES_CIPHER_MODE);
+		c.init(Cipher.DECRYPT_MODE, new SecretKeySpec(key, "AES"), new GCMParameterSpec(Constants.GCM_TAG_LENGTH_BITS, iv));
 		if (aad != null)
 			c.updateAAD(aad);
 		return c.doFinal(ciphertext);

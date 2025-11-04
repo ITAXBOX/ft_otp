@@ -9,13 +9,14 @@ import com.ftotp.crypto.KeyFile;
 import com.ftotp.crypto.Params;
 import com.ftotp.exception.UserException;
 import com.ftotp.hotp.HOTP;
+import com.ftotp.util.Constants;
 import com.ftotp.util.Hex;
 
 // Main class for ft_otp application
 // Provides methods to generate a key file and print OTP codes
 public class FtOtp {
 	// Default key file name
-	private static final String DEFAULT_KEYFILE = "ft_otp.key";
+	private static final String DEFAULT_KEYFILE = Constants.DEFAULT_KEY_FILENAME;
 
 	private FtOtp() {
 
@@ -24,26 +25,26 @@ public class FtOtp {
 	// hexKeyPath: path to the file containing the hexadecimal seed
 	public static void generate(String hexKeyPath) throws Exception {
 		String hex = Files.readString(Path.of(hexKeyPath)).trim().replaceAll("\\s+", "");
-		if (!Hex.isHex(hex) || hex.length() < 64) {
-			throw new UserException("key must be at least 64 hexadecimal characters.");
+		if (!Hex.isHex(hex) || hex.length() < Constants.MIN_HEX_KEY_LENGTH) {
+			throw new UserException(Constants.ERROR_KEY_TOO_SHORT);
 		}
 		byte[] seed = Hex.fromHex(hex);
 
 		Console console = System.console();
 		char[] pass1, pass2;
 		if (console != null) {
-			pass1 = console.readPassword("Enter passphrase: ");
-			pass2 = console.readPassword("Confirm passphrase: ");
+			pass1 = console.readPassword(Constants.PROMPT_ENTER_PASSPHRASE);
+			pass2 = console.readPassword(Constants.PROMPT_CONFIRM_PASSPHRASE);
 		} else {
 			try (Scanner sc = new Scanner(System.in)) {
-				System.out.print("Enter passphrase: ");
+				System.out.print(Constants.PROMPT_ENTER_PASSPHRASE);
 				pass1 = sc.nextLine().toCharArray();
-				System.out.print("Confirm passphrase: ");
+				System.out.print(Constants.PROMPT_CONFIRM_PASSPHRASE);
 				pass2 = sc.nextLine().toCharArray();
 			}
 		}
 		if (!Arrays.equals(pass1, pass2))
-			throw new UserException("passphrases do not match");
+			throw new UserException(Constants.ERROR_PASSPHRASE_MISMATCH);
 
 		KeyFile kf = KeyFile.encrypt(seed, pass1, Params.defaultParams());
 		Arrays.fill(seed, (byte) 0);
@@ -52,7 +53,7 @@ public class FtOtp {
 
 		Path out = Path.of(DEFAULT_KEYFILE);
 		Files.writeString(out, kf.serialize());
-		System.out.println("Key was successfully saved in " + DEFAULT_KEYFILE + ".");
+		System.out.printf(Constants.SUCCESS_KEY_SAVED + "%n", DEFAULT_KEYFILE);
 	}
 
 	// Prints the current OTP code using the key file and a passphrase
@@ -63,9 +64,9 @@ public class FtOtp {
 		Console console = System.console();
 		char[] pass;
 		if (console != null)
-			pass = console.readPassword("Enter passphrase: ");
+			pass = console.readPassword(Constants.PROMPT_ENTER_PASSPHRASE);
 		else {
-			System.out.print("Enter passphrase: ");
+			System.out.print(Constants.PROMPT_ENTER_PASSPHRASE);
 			try (Scanner sc = new Scanner(System.in)) {
 				pass = sc.nextLine().toCharArray();
 			}

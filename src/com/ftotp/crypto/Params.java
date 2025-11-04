@@ -1,5 +1,7 @@
 package com.ftotp.crypto;
 
+import com.ftotp.util.Constants;
+
 // Class to hold cryptographic parameters
 // digits - number of digits in the OTP
 // timestepSeconds - time step in seconds for TOTP
@@ -22,7 +24,13 @@ public final class Params {
 	}
 
 	public static Params defaultParams() {
-		return new Params(6, 30, "HmacSHA1", 150_000, 32);
+		return new Params(
+			Constants.DEFAULT_OTP_DIGITS,
+			Constants.DEFAULT_TIMESTEP_SECONDS,
+			Constants.DEFAULT_HMAC_ALGORITHM,
+			Constants.DEFAULT_PBKDF2_ITERATIONS,
+			Constants.DEFAULT_AES_KEY_BYTES
+		);
 	}
 
 	public int getDigits() {
