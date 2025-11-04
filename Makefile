@@ -11,16 +11,15 @@ $(WRAP): compile
 	@echo "#!/usr/bin/env sh" > $(WRAP)
 	@echo "exec java -cp $(OUT) $(MAIN) \"$$@\"" >> $(WRAP)
 	@chmod +x $(WRAP)
-	@echo "Built $(WRAP). Use: ./ft_otp -g key.hex | -k ft_otp.key"
 
 compile: $(OUT)/.stamp
 
 $(OUT)/.stamp: $(SRC)
 	@mkdir -p $(OUT)
-	$(JAVA) $(JFLAGS) -d $(OUT) $(SRC)
+	@$(JAVA) $(JFLAGS) -d $(OUT) $(SRC)
 	@touch $(OUT)/.stamp
 
 fclean:
-	rm -rf $(OUT) $(WRAP)
+	@rm -rf $(OUT) $(WRAP)
 
 .PHONY: all compile fclean

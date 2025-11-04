@@ -15,9 +15,6 @@ import com.ftotp.util.Hex;
 // Main class for ft_otp application
 // Provides methods to generate a key file and print OTP codes
 public class FtOtp {
-	// Default key file name
-	private static final String DEFAULT_KEYFILE = Constants.DEFAULT_KEY_FILENAME;
-
 	private FtOtp() {
 
 	}
@@ -51,9 +48,9 @@ public class FtOtp {
 		Arrays.fill(pass1, '\0');
 		Arrays.fill(pass2, '\0');
 
-		Path out = Path.of(DEFAULT_KEYFILE);
+		Path out = Path.of(Constants.DEFAULT_KEY_FILENAME);
 		Files.writeString(out, kf.serialize());
-		System.out.printf(Constants.SUCCESS_KEY_SAVED + "%n", DEFAULT_KEYFILE);
+		System.out.printf(Constants.SUCCESS_KEY_SAVED + "%n", Constants.DEFAULT_KEY_FILENAME);
 	}
 
 	// Prints the current OTP code using the key file and a passphrase
