@@ -10,11 +10,10 @@ public class Main {
 			System.exit(1);
 		}
 		try {
-			if ("-g".equals(args[0])) {
+			if ("-g".equals(args[0]))
 				FtOtp.generate(args[1]);
-			} else {
+			else
 				FtOtp.printOtp(args[1]);
-			}
 		} catch (UserException e) {
 			System.err.println("./ft_otp: error: " + e.getMessage());
 			System.exit(2);

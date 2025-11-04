@@ -11,13 +11,17 @@ import com.ftotp.exception.UserException;
 import com.ftotp.hotp.HOTP;
 import com.ftotp.util.Hex;
 
+// Main class for ft_otp application
+// Provides methods to generate a key file and print OTP codes
 public class FtOtp {
+	// Default key file name
 	private static final String DEFAULT_KEYFILE = "ft_otp.key";
 
 	private FtOtp() {
 
 	}
-
+	// Generates a new key file from a hexadecimal seed and a passphrase
+	// hexKeyPath: path to the file containing the hexadecimal seed
 	public static void generate(String hexKeyPath) throws Exception {
 		String hex = Files.readString(Path.of(hexKeyPath)).trim().replaceAll("\\s+", "");
 		if (!Hex.isHex(hex) || hex.length() < 64) {
@@ -38,9 +42,8 @@ public class FtOtp {
 				pass2 = sc.nextLine().toCharArray();
 			}
 		}
-		if (!Arrays.equals(pass1, pass2)) {
+		if (!Arrays.equals(pass1, pass2))
 			throw new UserException("passphrases do not match");
-		}
 
 		KeyFile kf = KeyFile.encrypt(seed, pass1, Params.defaultParams());
 		Arrays.fill(seed, (byte) 0);
@@ -52,6 +55,8 @@ public class FtOtp {
 		System.out.println("Key was successfully saved in " + DEFAULT_KEYFILE + ".");
 	}
 
+	// Prints the current OTP code using the key file and a passphrase
+	// keyFilePath: path to the key file
 	public static void printOtp(String keyFilePath) throws Exception {
 		KeyFile kf = KeyFile.deserialize(Files.readString(Path.of(keyFilePath)));
 

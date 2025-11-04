@@ -1,5 +1,11 @@
 package com.ftotp.crypto;
 
+// Class to hold cryptographic parameters
+// digits - number of digits in the OTP
+// timestepSeconds - time step in seconds for TOTP
+// hmac - HMAC algorithm to use
+// pbkdf2Iterations - number of iterations for PBKDF2
+// aesKeyBytes - size of AES key in bytes
 public final class Params {
 	private final int digits;
 	private final long timestepSeconds;

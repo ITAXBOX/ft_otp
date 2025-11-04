@@ -1,5 +1,6 @@
 package com.ftotp.util;
 
+// Utility class for hexadecimal encoding and decoding
 public final class Hex {
 	private static final char[] HEX = "0123456789abcdef".toCharArray();
 
